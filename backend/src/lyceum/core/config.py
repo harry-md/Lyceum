@@ -12,7 +12,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name = "Lyceum"
+    app_name: str = "Lyceum"
     database_url: str
 
     jwt_secret_key: SecretStr
