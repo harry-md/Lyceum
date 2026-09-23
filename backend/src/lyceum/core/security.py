@@ -22,7 +22,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 def create_access_token(user_id: UUID, settings: Settings) -> str:
     now = datetime.datetime.now(UTC)
-    expires_at = now + timedelta(minutes=settings.access_token_expire_minutes)
+    expires_at = now + timedelta(minutes=settings.jwt_expire)
 
     payload = {
         "sub": str(user_id),

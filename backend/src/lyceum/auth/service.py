@@ -1,11 +1,15 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from lyceum.auth.exceptions import AccountAlreadyExistsError
-from lyceum.auth.schemas import RegisterRequest, UserResponse
+from lyceum.auth.exceptions import AccountAlreadyExistsError, InvalidCredentialsError
+from lyceum.auth.schemas import (
+    LoginRequest,
+    RegisterRequest,
+    UserResponse,
+)
 from lyceum.core.config import Settings
-from lyceum.core.security import hash_password
-from lyceum.users.model import User, UserRole
+from lyceum.core.security import create_access_token, hash_password, verify_password
+from lyceum.users.models import User, UserRole
 from lyceum.users.repository import UserRepository
 
 
@@ -48,3 +52,15 @@ class AuthService:
         except IntegrityError as err:
             raise AccountAlreadyExistsError() from err
         return UserResponse.model_validate(user)
+
+    async def login(self, request: LoginRequest) -> str:
+        user = await self._user_repo.find_by_username_or_email(
+            username=request.identifier, email=request.identifier
+        )
+
+        if not user or not verify_password(
+            request.password.get_secret_value(), user.password
+        ):
+            raise InvalidCredentialsError("Sai username/email hoặc mật khẩu")
+
+        return create_access_token(user_id=user.id, settings=self._settings)

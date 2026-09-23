@@ -2,7 +2,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from lyceum.db.repository import BaseRepository
-from lyceum.users.model import User
+from lyceum.users.models import User
 
 
 class UserRepository(BaseRepository[User]):

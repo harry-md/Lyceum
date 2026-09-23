@@ -7,8 +7,8 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from lyceum.core.config import get_settings
-from lyceum.db.base import BaseModel
-from lyceum.users import model as user_model
+from lyceum.db.models import BaseModel
+from lyceum.users import models as user_model
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -5,4 +5,10 @@ class AccountAlreadyExistsError(Exception):
 
 
 class InvalidCredentialsError(Exception):
-    pass
+    def __init__(self, msg: str):
+        super().__init__(msg)
+
+
+class MissingAccessTokenError(Exception):
+    def __init__(self, msg: str):
+        super().__init__(msg)

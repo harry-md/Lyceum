@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from typing import Literal
 from uuid import UUID
 
 from pydantic import (
@@ -11,7 +10,7 @@ from pydantic import (
     field_validator,
 )
 
-from lyceum.users.model import UserRole
+from lyceum.users.models import UserRole
 
 
 class RegisterRequest(BaseModel):
@@ -32,7 +31,7 @@ class RegisterRequest(BaseModel):
 
 class LoginRequest(BaseModel):
     identifier: str = Field(min_length=1, max_length=100)
-    password: str = Field(min_length=1, max_length=100)
+    password: SecretStr = Field(min_length=1, max_length=100)
 
 
 class UserResponse(BaseModel):
@@ -46,11 +45,3 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: UserRole
     created_at: datetime
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-
-
-class ErrorResponse(BaseModel):
-    message: str
