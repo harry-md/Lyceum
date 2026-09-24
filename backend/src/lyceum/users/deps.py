@@ -9,7 +9,6 @@ from lyceum.auth.exceptions import InvalidCredentialsError, MissingAccessTokenEr
 from lyceum.auth.schemas import UserResponse
 from lyceum.core.deps import SettingsDep
 from lyceum.db.deps import SessionDep
-from lyceum.shared.exceptions import ResourceNotFoundError
 from lyceum.users.repository import UserRepository
 
 
@@ -36,8 +35,8 @@ async def get_current_user(
             options={"require": ["sub", "exp"]},
         )
         user_id = UUID(payload["sub"])
-    except:
-        raise MissingAccessTokenError("Lỗi khi decode token")
+    except Exception as ex:
+        raise MissingAccessTokenError("Lỗi khi decode token") from ex
 
     user = await user_repository.find_by_id(user_id)
     if not user:

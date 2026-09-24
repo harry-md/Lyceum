@@ -1,4 +1,5 @@
 import asyncio
+from importlib import import_module
 from logging.config import fileConfig
 
 from alembic import context
@@ -8,7 +9,20 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from lyceum.core.config import get_settings
 from lyceum.db.models import BaseModel
-from lyceum.users import models as user_model
+
+for package in (
+    "users",
+    "categories",
+    "courses",
+    "chapters",
+    "lessons",
+    "enrollments",
+    "progresses",
+    "exercises",
+    "review",
+    "payments",
+):
+    import_module(f"lyceum.{package}.models")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
