@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Request, status
-from pydantic import ValidationError
 from starlette.responses import JSONResponse
 
 from lyceum.shared.exceptions import ResourceNotFoundError
