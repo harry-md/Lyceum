@@ -76,7 +76,12 @@ class Course(BaseModel):
         type_=String(255), nullable=True
     )
     description: Mapped[str | None] = mapped_column(type_=Text(), nullable=True)
-    thumbnail: Mapped[str] = mapped_column(type_=String(255), nullable=False)
+    thumbnail: Mapped[str] = mapped_column(
+        type_=String(255),
+        nullable=False,
+        default="https://res.cloudinary.com/dswxedhsf/image/upload/v1790330266/secretary_15_nruvqx.jpg",
+        server_default="https://res.cloudinary.com/dswxedhsf/image/upload/v1790330266/secretary_15_nruvqx.jpg",
+    )
     level: Mapped[CourseLevel] = mapped_column(
         type_=Enum(
             CourseLevel,

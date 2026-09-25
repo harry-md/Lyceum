@@ -1,5 +1,6 @@
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import Any, AsyncGenerator, Generator
+from typing import Any
 
 import pytest
 import pytest_asyncio
@@ -23,7 +24,7 @@ class TestSettings(Settings):
 
 
 @pytest.fixture(scope="session")
-def app() -> Generator[FastAPI, Any, None]:
+def app():
     test_settings = TestSettings()
 
     if make_url(test_settings.database_url).database != "lyceumdb_test":

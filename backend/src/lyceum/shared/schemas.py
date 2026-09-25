@@ -10,7 +10,7 @@ class ErrorResponse(BaseModel):
 T = TypeVar("T")
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class Page(BaseModel, Generic[T]):
     items: list[T]
     total: int
     page: int
