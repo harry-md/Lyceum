@@ -59,10 +59,12 @@ class Instructor(Base):
         type_=DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(UTC),
+        server_default="CURRENT_TIMESTAMP",
     )
     updated_at: Mapped[datetime] = mapped_column(
         type_=DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
+        server_default="CURRENT_TIMESTAMP",
     )

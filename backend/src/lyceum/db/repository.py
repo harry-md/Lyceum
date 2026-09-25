@@ -1,5 +1,6 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Generic, Sequence, TypeVar
+from typing import Generic, TypeVar
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -34,37 +35,22 @@ class BaseRepository(Generic[ModelT]):
         res = await self._session.scalars(stm)
         return list(res.all())
 
-    async def find_paginated(
+    async def find_all_paginated(
         self,
-        page: int = 1,
-        page_size: int = 10,
-        order_by: str | None = None,
-    ) -> Page[ModelT]:
-        offset = (page - 1) * page_size
+        offset: int = 0,
+        limit: int | None = None,
+    ) -> list[ModelT]:
+        stmt = select(self._model).offset(offset)
 
-        stm = select(self._model).limit(page_size).offset(offset)
-        if order_by:
-            col = getattr(self._model, order_by)
-            stm = stm.order_by(col)
-        else:
-            stm = stm.order_by(self._model.id)
+        if limit is not None:
+            stmt = stmt.limit(limit)
 
-        result = await self._session.execute(stm)
-        items = result.scalars().all()
+        result = await self._session.scalars(stmt)
+        return list(result.all())
 
-        count_stm = select(func.count()).select_from(self._model)
-
-        total = await self._session.scalar(count_stm) or 0
-
-        total_pages = (total + page_size - 1) // page_size if page_size > 0 else 0
-
-        return Page(
-            items=items,
-            total=total,
-            page=page,
-            page_size=page_size,
-            total_pages=total_pages,
-        )
+    async def count(self) -> int:
+        stmt = select(func.count()).select_from(self._model)
+        return await self._session.scalar(stmt) or 0
 
     def add(self, entity: ModelT) -> None:
         self._session.add(entity)
