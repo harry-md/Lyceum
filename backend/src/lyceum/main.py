@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from lyceum.auth.api import router as auth_router
 from lyceum.auth.exception_handlers import register_auth_exception_handlers
 from lyceum.core.config import get_settings
+from lyceum.courses.api import router as course_router
 from lyceum.shared.exception_handlers import register_shared_exception_handlers
 from lyceum.users.api import router as user_router
 
@@ -21,6 +22,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(course_router)
 
 register_auth_exception_handlers(app)
 register_shared_exception_handlers(app)

@@ -8,7 +8,6 @@ from lyceum.auth.schemas import (
 )
 from lyceum.core.deps import SettingsDep
 
-
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
