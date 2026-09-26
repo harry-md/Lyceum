@@ -1,3 +1,4 @@
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,58 +10,56 @@ from lyceum.auth.schemas import (
 )
 from lyceum.core.config import Settings
 from lyceum.core.security import create_access_token, hash_password, verify_password
+from lyceum.shared.exceptions import ConflictError
 from lyceum.users.models import User, UserRole
-from lyceum.users.repository import UserRepository
 
 
-class AuthService:
-    def __init__(
-        self,
-        session: AsyncSession,
-        user_repository: UserRepository,
-        settings: Settings,
-    ):
-        self._session = session
-        self._user_repo = user_repository
-        self._settings = settings
+async def register(request: RegisterRequest, session: AsyncSession) -> UserResponse:
+    username = request.username
+    email = request.email
 
-    async def register(self, request: RegisterRequest) -> UserResponse:
-        username = request.username.casefold()
-        email = request.email.casefold()
+    try:
+        async with session.begin():
+            existing_user: User | None = await session.scalar(
+                select(User).where(or_(User.username == username, User.email == email))
+            )
 
-        try:
-            async with self._session.begin():
-                existing_user = await self._user_repo.find_by_username_or_email(
-                    username=username, email=email
-                )
-                if existing_user:
-                    if existing_user.username == username:
-                        raise AccountAlreadyExistsError("username")
-                    raise AccountAlreadyExistsError("email")
+            if existing_user:
+                if existing_user.username == username:
+                    raise AccountAlreadyExistsError("Username")
+                raise AccountAlreadyExistsError("Email")
 
-                user = User(
-                    username=username,
-                    email=email,
-                    first_name=request.first_name,
-                    last_name=request.last_name,
-                    dob=request.dob,
-                    password=hash_password(request.password.get_secret_value()),
-                    role=UserRole.STUDENT,
-                )
+            user = User(
+                username=username,
+                email=email,
+                first_name=request.first_name,
+                last_name=request.last_name,
+                dob=request.dob,
+                password=hash_password(request.password.get_secret_value()),
+                role=UserRole.STUDENT,
+            )
 
-                self._user_repo.add(user)
-        except IntegrityError as err:
-            raise AccountAlreadyExistsError() from err
-        return UserResponse.model_validate(user)
+            session.add(user)
+    except IntegrityError as err:
+        raise ConflictError("Có lỗi khi đăng ký tài khoản") from err
+    return UserResponse.model_validate(user)
 
-    async def login(self, request: LoginRequest) -> str:
-        user = await self._user_repo.find_by_username_or_email(
-            username=request.identifier, email=request.identifier
+
+async def login(
+    request: LoginRequest, session: AsyncSession, settings: Settings
+) -> str:
+    user: User | None = await session.scalar(
+        select(User).where(
+            or_(
+                User.username == request.identifier,
+                User.email == request.identifier,
+            )
         )
+    )
 
-        if not user or not verify_password(
-            request.password.get_secret_value(), user.password
-        ):
-            raise InvalidCredentialsError("Sai username/email hoặc mật khẩu")
+    if not user or not verify_password(
+        request.password.get_secret_value(), user.password
+    ):
+        raise InvalidCredentialsError("Sai username/email hoặc mật khẩu")
 
-        return create_access_token(user_id=user.id, settings=self._settings)
+    return create_access_token(user_id=user.id, settings=settings)

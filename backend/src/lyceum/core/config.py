@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     frontend_origin: str = "http://localhost:3000"
     sql_echo: bool = True
 
+    cloudinary_cloud_name: str | None = None
+    cloudinary_api_key: str | None = None
+    cloudinary_api_secret: SecretStr | None = None
+
 
 @lru_cache
 def get_settings() -> Settings:
