@@ -1,10 +1,17 @@
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import StrEnum
-from typing import Self
+from typing import Annotated, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 from lyceum.courses.models import CourseLevel, CourseStatus
 
@@ -95,3 +102,51 @@ class CourseListResponse(BaseModel):
     rating_count: int
     enrollment_count: int
     total_duration_mins: int
+
+
+type LearningPoint = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+        max_length=1000,
+        pattern=r"^[^\r\n]+$",
+    ),
+]
+
+
+class CourseCreateRequest(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        str_strip_whitespace=True,
+    )
+
+    title: str = Field(min_length=1, max_length=255)
+    short_description: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+    )
+    description: list[LearningPoint] = Field(
+        min_length=1,
+        max_length=50,
+    )
+    level: CourseLevel
+    price: Decimal = Field(
+        ge=0,
+        max_digits=10,
+        decimal_places=2,
+    )
+
+
+class CourseCreateResponse(CourseListResponse):
+    description: list[str]
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def deserialize_description(cls, value):
+        if value is None:
+            return []
+        if isinstance(value, str):
+            return value.split("\n")
+        return value

@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from pydantic import (
     BaseModel,
@@ -24,7 +25,7 @@ class RegisterRequest(BaseModel):
     @field_validator("dob")
     @classmethod
     def validate_dob(cls, value: date) -> date:
-        if value > date.today():
+        if value > datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date():
             raise ValueError("Ngày sinh không được ở tương lai")
         return value
 
@@ -45,3 +46,4 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: UserRole
     created_at: datetime
+    updated_at: datetime
