@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Response, status
 
-from lyceum.auth.deps import AuthServiceDep
+import lyceum.auth.service as auth_service
 from lyceum.auth.schemas import (
     LoginRequest,
     RegisterRequest,
     UserResponse,
 )
 from lyceum.core.deps import SettingsDep
+from lyceum.db.deps import SessionDep
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -17,9 +18,10 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
     status_code=status.HTTP_201_CREATED,
 )
 async def register(
-    request: RegisterRequest, auth_service: AuthServiceDep
+    request: RegisterRequest,
+    session: SessionDep,
 ) -> UserResponse:
-    return await auth_service.register(request)
+    return await auth_service.register(request, session)
 
 
 @router.post(
@@ -29,10 +31,13 @@ async def register(
 async def login(
     response: Response,
     request: LoginRequest,
-    auth_service: AuthServiceDep,
+    session: SessionDep,
     settings: SettingsDep,
 ) -> dict[str, str]:
-    token = await auth_service.login(request)
+    token = await auth_service.login(
+        request=request, session=session, settings=settings
+    )
+
     response.set_cookie(
         key="access_token",
         value=token,

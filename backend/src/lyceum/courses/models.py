@@ -69,7 +69,7 @@ class Course(BaseModel):
     instructor_id: Mapped[UUID] = mapped_column(
         ForeignKey(Instructor.user_id), nullable=False, index=True
     )
-    instructor_name: Mapped[str] = mapped_column(type_=String(200), nullable=False)
+    instructor_name: Mapped[str] = mapped_column(type_=String(201), nullable=False)
     title: Mapped[str] = mapped_column(type_=String(255), nullable=False)
     slug: Mapped[str] = mapped_column(type_=String(255), nullable=False)
     short_description: Mapped[str | None] = mapped_column(

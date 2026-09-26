@@ -1,6 +1,4 @@
-from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import Any
 
 import pytest
 import pytest_asyncio
@@ -47,7 +45,7 @@ def app():
 
 
 @pytest_asyncio.fixture
-async def db_connection(app) -> AsyncGenerator[AsyncConnection]:
+async def db_connection(app):
     from lyceum.db.session import engine
 
     if engine.url.database != "lyceumdb_test":
@@ -64,7 +62,7 @@ async def db_connection(app) -> AsyncGenerator[AsyncConnection]:
 
 
 @pytest_asyncio.fixture
-async def session(db_connection: AsyncConnection) -> AsyncGenerator[AsyncSession]:
+async def session(db_connection: AsyncConnection):
     async with AsyncSession(
         bind=db_connection,
         expire_on_commit=False,
@@ -74,9 +72,7 @@ async def session(db_connection: AsyncConnection) -> AsyncGenerator[AsyncSession
 
 
 @pytest_asyncio.fixture
-async def client(
-    app: FastAPI, db_connection: AsyncConnection
-) -> AsyncGenerator[AsyncClient, Any]:
+async def client(app: FastAPI, db_connection: AsyncConnection):
     from lyceum.db.session import get_session
 
     async def override_get_session():

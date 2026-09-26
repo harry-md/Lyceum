@@ -1,5 +1,3 @@
-from collections.abc import AsyncIterator
-
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from lyceum.core.config import get_settings
@@ -22,6 +20,6 @@ AsyncSessionFactory = async_sessionmaker(
 )
 
 
-async def get_session() -> AsyncIterator[AsyncSession]:
+async def get_session():
     async with AsyncSessionFactory() as session:
         yield session
